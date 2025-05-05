@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Agent Access</title>
+    <script>
+        function authenticate() {
+            let v1 = parseInt(prompt("ID number:"));
+            if (v1 === 369) {
+                let v2 = prompt("Secret agent, come in:");
+                if (v2 === "madhav") {
+                    let v3 = prompt("FULL NAME PLEASE:");
+                    if (v3 === "madhav yadav") {
+                        alert("You are invited to come. Code 000200");
+                        let v4 = prompt("What is the input code:");
+                        if (v4 === "000200") {
+                            window.open("index(1).html");  // Online-relative path
+                        } else {
+                            alert("You are dumb");
+                        }
+                    } else {
+                        alert("Go away, intruder");
+                    }
+                } else {
+                    alert("You are not invited");
+                }
+            } else if (v1 >= 0 && v1 <= 999999) {
+                alert("You are good to go back");
+            } else {
+                alert("This is not valid");
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Secret Agent Login</h1>
+    <button onclick="authenticate()">Enter</button>
+</body>
+</html>

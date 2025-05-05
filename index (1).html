@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chaotic Encryption</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Roboto+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap');
+    
+    :root {
+      --primary-color: #00c3ff;
+      --primary-dark: #0077b6;
+      --secondary-color: #ff00aa;
+      --tertiary-color: #00ffaa;
+      --bg-dark: #0a1119;
+      --bg-medium: #141e2b;
+      --bg-light: #1c2939;
+      --text-primary: #edf2f7;
+      --text-secondary: #a0aec0;
+      --accent-green: #26ffac;
+      --accent-pink: #fa00ff;
+      --accent-blue: #00c8ff;
+      --grid-size: 30px;
+      --glow-strength: 0.8;
+    }
+    
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    
+    ::selection {
+      background: var(--primary-color);
+      color: var(--bg-dark);
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      background-image: 
+        linear-gradient(rgba(0, 195, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 195, 255, 0.03) 1px, transparent 1px);
+      background-size: var(--grid-size) var(--grid-size);
+      background-position: center center;
+      perspective: 1000px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 0%, rgba(0, 195, 255, 0.15), transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 30px 20px;
+      position: relative;
+    }
+    
+    header {
+      text-align: center;
+      padding: 35px 30px;
+      background-color: rgba(20, 30, 43, 0.7);
+      color: white;
+      margin-bottom: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                  0 0 10px rgba(0, 195, 255, 0.2),
+                  inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      transform: translateZ(0) rotateX(1deg);
+      transition: transform 0.5s ease;
+    }
+    
+    header::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent, 
+        rgba(0, 195, 255, 0.1),
+        transparent
+      );
+      transform: rotate(45deg);
+      animation: headerGlow 8s linear infinite;
+      pointer-events: none;
+    }
+    
+    @keyframes headerGlow {
+      0% {
+        transform: rotate(45deg) translateX(-100%);
+      }
+      100% {
+        transform: rotate(45deg) translateX(100%);
+      }
+    }
+    
+    h1, h2, h3 {
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    
+    h1 {
+      margin: 0;
+      font-size: 2.6rem;
+      background: linear-gradient(120deg, var(--primary-color), var(--accent-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+      display: inline-block;
+    }
+    
+    h1::after {
+      content: "CHAOS";
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      color: rgba(0, 195, 255, 0.1);
+      z-index: -1;
+      filter: blur(7px);
+    }
+    
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+      position: relative;
+    }
+    
+    h2::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      height: 3px;
+      width: 60px;
+      background: linear-gradient(90deg, var(--primary-color), transparent);
+    }
+    
+    h3 {
+      margin-bottom: 12px;
+      color: var(--accent-green);
+    }
+    
+    .tagline {
+      font-family: 'Roboto Mono', monospace;
+      margin-top: 15px;
+      opacity: 0.9;
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+    
+    .tabs {
+      display: flex;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      background: var(--bg-medium);
+      border: 1px solid rgba(0, 195, 255, 0.15);
+      z-index: 2;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 18px 0;
+      text-align: center;
+      background-color: transparent;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      font-weight: 600;
+      position: relative;
+      overflow: hidden;
+      font-family: 'Roboto Mono', monospace;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      z-index: 2;
+    }
+    
+    .tab::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: transparent;
+      transition: all 0.4s ease;
+    }
+    
+    .tab.active {
+      color: var(--primary-color);
+    }
+    
+    .tab.active::before {
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-pink));
+      box-shadow: 0 0 15px var(--primary-color);
+    }
+    
+    .tab:nth-child(1).active ~ .tab-highlight {
+      transform: translateX(0%);
+    }
+    
+    .tab:nth-child(2).active ~ .tab-highlight {
+      transform: translateX(100%);
+    }
+    
+    .tab:nth-child(3).active ~ .tab-highlight {
+      transform: translateX(200%);
+    }
+    
+    .tab-highlight {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 33.33%;
+      height: 100%;
+      background: rgba(0, 195, 255, 0.05);
+      border-top: 2px solid var(--primary-color);
+      z-index: 1;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+    
+    .panel {
+      display: none;
+      background: var(--bg-medium);
+      padding: 35px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.5s ease forwards;
+      transform: translateY(0);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    .panel::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at top right, rgba(0, 195, 255, 0.1), transparent 40%),
+        radial-gradient(circle at bottom left, rgba(255, 0, 170, 0.1), transparent 40%);
+      pointer-events: none;
+    }
+    
+    .panel.active {
+      display: block;
+    }
+    
+    .form-group {
+      margin-bottom: 28px;
+      position: relative;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 500;
+      font-family: 'Roboto Mono', monospace;
+      color: var(--primary-color);
+      font-size: 0.95rem;
+      position: relative;
+      padding-left: 16px;
+      letter-spacing: 0.5px;
+    }
+    
+    label::before {
+      content: ">";
+      position: absolute;
+      left: 0;
+      color: var(--primary-color);
+    }
+    
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 16px;
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      border: 1px solid rgba(0, 195, 255, 0.2);
+      border-radius: 6px;
+      resize: vertical;
+      font-size: 1rem;
+      font-family: 'Roboto Mono', monospace;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    textarea:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 195, 255, 0.2);
+    }
+    
+    button {
+      padding: 16px 32px;
+      background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      font-family: 'Orbitron', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3),
+                 0 0 0 1px rgba(0, 195, 255, 0.3);
+      transform: translateY(0);
+    }
+    
+    button::before {
+      content: "";
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, 
+        var(--primary-color), 
+        var(--accent-pink),
+        var(--accent-green),
+        var(--primary-color));
+      z-index: -1;
+      border-radius: 8px;
+      background-size: 400%;
+      animation: borderFlow 6s linear infinite;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4),
+                 0 0 0 1px rgba(0, 195, 255, 0.5);
+    }
+    
+    button:hover::before {
+      opacity: 1;
+    }
+    
+    button:active {
+      transform: translateY(1px);
+    }
+    
+    @keyframes borderFlow {
+      0% { background-position: 0 0; }
+      100% { background-position: 400% 0; }
+    }
+    
+    button i {
+      margin-right: 8px;
+    }
+    
+    .file-input {
+      display: none;
+    }
+    
+    .file-label {
+      display: inline-block;
+      padding: 14px 24px;
+      background: var(--bg-light);
+      color: var(--text-primary);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      margin-right: 10px;
+      border: 1px solid rgba(0, 195, 255, 0.2);
+      font-family: 'Roboto Mono', monospace;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .file-label::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+      );
+      transition: all 0.6s ease;
+    }
+    
+    .file-label:hover {
+      background: var(--bg-medium);
+      border-color: var(--primary-color);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+    
+    .file-label:hover::before {
+      left: 100%;
+    }
+    
+    .file-name {
+      display: inline-block;
+      margin-left: 10px;
+      font-style: italic;
+      color: var(--text-secondary);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 0.9rem;
+    }
+    
+    .result {
+      margin-top: 30px;
+      padding: 25px;
+      background-color: var(--bg-light);
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-color);
+      animation: resultFadeIn 0.5s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2),
+                 inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+    
+    @keyframes resultFadeIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    .result::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--primary-color), var(--accent-pink));
+      box-shadow: 0 0 15px var(--primary-color);
+    }
+    
+    .explanation {
+      margin-top: 40px;
+      background-color: rgba(0, 195, 255, 0.05);
+      padding: 30px;
+      border-radius: 12px;
+      position: relative;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                 inset 0 0 0 1px rgba(0, 195, 255, 0.1);
+      overflow: hidden;
+    }
+    
+    .explanation::before {
+      content: "";
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(0, 195, 255, 0.1), transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    
+    .visualization {
+      width: 100%;
+      height: 250px;
+      background-color: var(--bg-dark);
+      border: 1px solid rgba(0, 195, 255, 0.2);
+      border-radius: 8px;
+      margin-top: 30px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
+                 inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+    
+    .visualization::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(var(--bg-dark), transparent 20%),
+        linear-gradient(to top, var(--bg-dark), transparent 20%);
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .visualization::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at center, transparent 50%, var(--bg-dark));
+      pointer-events: none;
+      opacity: 0.5;
+      z-index: 1;
+    }
+    
+    .visualization canvas {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 0;
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 50px;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      position: relative;
+    }
+    
+    .footer::before {
+      content: "";
+      position: absolute;
+      top: -1px;
+      left: 25%;
+      width: 50%;
+      height: 1px;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba(0, 195, 255, 0.3),
+        transparent);
+    }
+    
+    .code-block {
+      background-color: var(--bg-dark);
+      padding: 25px;
+      border-radius: 8px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 20px 0;
+      border: 1px solid rgba(0, 195, 255, 0.1);
+      color: var(--text-primary);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+    
+    .code-block::before {
+      content: "</> code";
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      background: var(--bg-medium);
+      padding: 0 10px;
+      font-size: 0.8rem;
+      color: var(--primary-color);
+      font-family: 'Roboto Mono', monospace;
+      border: 1px solid rgba(0, 195, 255, 0.1);
+      border-radius: 4px;
+    }
+    
+    /* Matrix animation on background */
+    .matrix-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      opacity: 0.05;
+      pointer-events: none;
+    }
+    
+    /* Floating elements */
+    .floating-element {
+      position: absolute;
+      background: linear-gradient(45deg, var(--primary-color), transparent);
+      border-radius: 50%;
+      filter: blur(30px);
+      z-index: -1;
+      animation: float 15s infinite alternate ease-in-out;
+      opacity: 0.1;
+    }
+    
+    .floating-1 {
+      width: 300px;
+      height: 300px;
+      top: 10%;
+      right: -150px;
+      background: linear-gradient(45deg, var(--accent-pink), transparent);
+      animation-duration: 20s;
+    }
+    
+    .floating-2 {
+      width: 250px;
+      height: 250px;
+      bottom: 20%;
+      left: -100px;
+      background: linear-gradient(45deg, var(--accent-blue), transparent);
+      animation-duration: 25s;
+      animation-delay: 2s;
+    }
+    
+    .floating-3 {
+      width: 200px;
+      height: 200px;
+      top: 50%;
+      right: 10%;
+      background: linear-gradient(45deg, var(--accent-green), transparent);
+      animation-duration: 18s;
+      animation-delay: 5s;
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+      50% {
+        transform: translate(-30px, 30px) rotate(180deg);
+      }
+      100% {
+        transform: translate(30px, -30px) rotate(360deg);
+      }
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+      
+      header {
+        padding: 25px 15px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .panel {
+        padding: 25px 15px;
+      }
+      
+      .floating-element {
+        opacity: 0.05;
+      }
+    }
+    
+    /* Syntax highlighting for code */
+    .token-string { color: var(--accent-green); }
+    .token-comment { color: var(--text-secondary); }
+    .token-keyword { color: var(--primary-color); }
+    .token-function { color: var(--accent-pink); }
+    .token-number { color: var(--accent-blue); }
+    .token-operator { color: #ff9500; }
+  </style>
+</head>
+<body>
+  <!-- Matrix background animation -->
+  <canvas id="matrix-canvas" class="matrix-bg"></canvas>
+  
+  <!-- Floating elements for futuristic background -->
+  <div class="floating-element floating-1"></div>
+  <div class="floating-element floating-2"></div>
+  <div class="floating-element floating-3"></div>
+  
+  <div class="container">
+    <header>
+      <h1>Chaotic Encryption System</h1>
+      <p class="tagline">Secure communication using image-based chaos algorithms</p>
+    </header>
+    
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('encrypt')">Encrypt</div>
+      <div class="tab" onclick="switchTab('decrypt')">Decrypt</div>
+      <div class="tab" onclick="switchTab('about')">How It Works</div>
+      <div class="tab-highlight"></div>
+    </div>
+    
+    <div id="encrypt-panel" class="panel active">
+      <h2>Encrypt a Message</h2>
+      <div class="form-group">
+        <label for="encrypt-message">Message to Encrypt:</label>
+        <textarea id="encrypt-message" rows="5" placeholder="Enter your message here..."></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>Chaos Image (provides encryption entropy):</label>
+        <input type="file" id="encrypt-image" class="file-input" accept="image/*">
+        <label for="encrypt-image" class="file-label">Choose Image</label>
+        <span id="encrypt-image-name" class="file-name">No file chosen</span>
+      </div>
+      
+      <button id="encrypt-btn" onclick="encryptMessage()">
+        <span>Encrypt Message</span>
+      </button>
+      
+      <div id="encrypt-result" class="result" style="display: none;"></div>
+      
+      <div class="visualization">
+        <canvas id="encrypt-canvas"></canvas>
+      </div>
+    </div>
+    
+    <div id="decrypt-panel" class="panel">
+      <h2>Decrypt a Message</h2>
+      
+      <div class="form-group">
+        <label for="decrypt-data">Encrypted Data (JSON):</label>
+        <textarea id="decrypt-data" rows="5" placeholder="Paste your encrypted JSON data here..."></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>Chaos Image (must be the same as used for encryption):</label>
+        <input type="file" id="decrypt-image" class="file-input" accept="image/*">
+        <label for="decrypt-image" class="file-label">Choose Image</label>
+        <span id="decrypt-image-name" class="file-name">No file chosen</span>
+      </div>
+      
+      <button id="decrypt-btn" onclick="decryptMessage()">
+        <span>Decrypt Message</span>
+      </button>
+      
+      <div id="decrypt-result" class="result" style="display: none;"></div>
+      
+      <div class="visualization">
+        <canvas id="decrypt-canvas"></canvas>
+      </div>
+    </div>
+    
+    <div id="about-panel" class="panel">
+      <h2>How Chaotic Encryption Works</h2>
+      
+      <p>This system uses a novel approach to encryption based on chaos theory and image entropy:</p>
+      
+      <ol>
+        <li><strong>Image Entropy Extraction:</strong> The system samples pixel values from an image to extract initial conditions for a chaotic system.</li>
+        <li><strong>Chaotic Sequence Generation:</strong> Using the logistic map equation (x(n+1) = r * x(n) * (1 - x(n))), we generate a sequence of pseudo-random numbers.</li>
+        <li><strong>Prime Number Mapping:</strong> These chaotic values are converted to prime numbers to serve as encryption keys.</li>
+        <li><strong>XOR Encryption:</strong> The message is encrypted by XORing each byte with a corresponding prime-derived key.</li>
+      </ol>
+      
+      <div class="explanation">
+        <h3>Security Features</h3>
+        <p>This encryption method has several security advantages:</p>
+        <ul>
+          <li>The chaos parameters (x0 and r) are extremely sensitive to initial conditions</li>
+          <li>The same image must be used for both encryption and decryption</li>
+          <li>Even small changes to the image result in completely different encryption keys</li>
+          <li>The use of prime numbers adds an additional layer of complexity</li>
+        </ul>
+      </div>
+      
+      <div class="code-block">
+        // The core of our chaotic system is the logistic map:
+        function generateChaos(x0, r, length) {
+            const x = [x0];
+            for (let i = 1; i < length; i++) {
+                x[i] = r * x[i - 1] * (1 - x[i - 1]);
+            }
+            return x;
+        }
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>Chaotic Encryption System &copy; 2025 | All rights reserved</p>
+      <p>A demonstration of chaos theory applied to cryptography</p>
+    </div>
+  </div>
+
+  <script>
+    // Pure JavaScript implementation of chaotic encryption
+    
+    function switchTab(tabId) {
+      // Hide all panels and deactivate all tabs
+      document.querySelectorAll('.panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Activate selected panel and tab
+      document.getElementById(`${tabId}-panel`).classList.add('active');
+      document.querySelector(`.tab:nth-child(${tabId === 'encrypt' ? 1 : tabId === 'decrypt' ? 2 : 3})`).classList.add('active');
+    }
+
+    // Handle file selection display
+    document.getElementById('encrypt-image').addEventListener('change', function(e) {
+      const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
+      document.getElementById('encrypt-image-name').textContent = fileName;
+      if (e.target.files[0]) {
+        drawImageToCanvas('encrypt-canvas', e.target.files[0]);
+      }
+    });
+
+    document.getElementById('decrypt-image').addEventListener('change', function(e) {
+      const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
+      document.getElementById('decrypt-image-name').textContent = fileName;
+      if (e.target.files[0]) {
+        drawImageToCanvas('decrypt-canvas', e.target.files[0]);
+      }
+    });
+
+    // Draw image to canvas
+    function drawImageToCanvas(canvasId, imageFile) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw image
+      const img = new Image();
+      img.onload = function() {
+        // Set canvas dimensions
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        
+        // Calculate dimensions to maintain aspect ratio
+        const aspectRatio = img.width / img.height;
+        let drawWidth = canvas.width;
+        let drawHeight = drawWidth / aspectRatio;
+        
+        if (drawHeight > canvas.height) {
+          drawHeight = canvas.height;
+          drawWidth = drawHeight * aspectRatio;
+        }
+        
+        // Center the image
+        const x = (canvas.width - drawWidth) / 2;
+        const y = (canvas.height - drawHeight) / 2;
+        
+        ctx.drawImage(img, x, y, drawWidth, drawHeight);
+      };
+      
+      img.src = URL.createObjectURL(imageFile);
+    }
+
+    // Extract entropy from image
+    async function extractEntropy(imageFile, sampleCount = 10) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          
+          const pixels = [];
+          const stepX = Math.floor(img.width / Math.sqrt(sampleCount));
+          const stepY = Math.floor(img.height / Math.sqrt(sampleCount));
+          
+          for (let y = 0; y < img.height && pixels.length < sampleCount; y += stepY) {
+            for (let x = 0; x < img.width && pixels.length < sampleCount; x += stepX) {
+              const pixelData = ctx.getImageData(x, y, 1, 1).data;
+              const gray = Math.floor((pixelData[0] + pixelData[1] + pixelData[2]) / 3);
+              pixels.push(gray);
+            }
+          }
+          
+          const sum = pixels.reduce((a, b) => a + b, 0);
+          const x0 = (sum % 1000) / 1000;
+          
+          const half = Math.floor(pixels.length / 2);
+          const xorSum = pixels.slice(0, half).reduce((a, b) => a ^ b, 0) ^
+                         pixels.slice(half).reduce((a, b) => a ^ b, 0);
+          const r = 3.57 + ((xorSum % 430) / 1000);
+          
+          resolve({ x0, r });
+        };
+        
+        img.src = URL.createObjectURL(imageFile);
+      });
+    }
+
+    // Generate chaotic sequence
+    function generateChaos(x0, r, length) {
+      const x = [x0];
+      for (let i = 1; i < length; i++) {
+        x[i] = r * x[i - 1] * (1 - x[i - 1]);
+      }
+      return x;
+    }
+
+    // Check if a number is prime (simplified implementation)
+    function isPrime(n) {
+      if (n <= 1) return false;
+      if (n <= 3) return true;
+      if (n % 2 === 0 || n % 3 === 0) return false;
+      
+      let i = 5;
+      while (i * i <= n) {
+        if (n % i === 0 || n % (i + 2) === 0) return false;
+        i += 6;
+      }
+      return true;
+    }
+
+    // Generate prime numbers from chaotic sequence
+    function chaosToPrimes(sequence) {
+      return sequence.map(v => {
+        let z = Math.floor(v * 10000);
+        while (!isPrime(z)) z++;
+        return z;
+      });
+    }
+
+    // Encrypt function
+    function encrypt(message, keys) {
+      const buffer = new TextEncoder().encode(message);
+      return Array.from(buffer).map((b, i) => b ^ (keys[i % keys.length] % 256));
+    }
+
+    // Decrypt function
+    function decrypt(cipher, keys) {
+      const bytes = cipher.map((b, i) => b ^ (keys[i % keys.length] % 256));
+      return new TextDecoder().decode(new Uint8Array(bytes));
+    }
+
+    // Encrypt message handler
+    async function encryptMessage() {
+      const messageEl = document.getElementById('encrypt-message');
+      const message = messageEl.value.trim();
+      const imageEl = document.getElementById('encrypt-image');
+      const resultEl = document.getElementById('encrypt-result');
+      
+      if (!message) {
+        alert('Please enter a message to encrypt');
+        return;
+      }
+      
+      if (!imageEl.files[0]) {
+        alert('Please select an image for entropy');
+        return;
+      }
+      
+      try {
+        // Extract entropy from image
+        const { x0, r } = await extractEntropy(imageEl.files[0], 16);
+        
+        // Generate chaotic sequence and prime keys
+        const chaosSeq = generateChaos(x0, r, message.length);
+        const primeKeys = chaosToPrimes(chaosSeq);
+        
+        // Encrypt message
+        const encrypted = encrypt(message, primeKeys);
+        
+        // Create result object
+        const result = {
+          cipher: encrypted,
+          length: message.length
+        };
+        
+        // Display result
+        resultEl.innerHTML = `
+          <h3>Encryption Successful!</h3>
+          <p>Your encrypted data:</p>
+          <div class="code-block">${JSON.stringify(result, null, 2)}</div>
+          <p>Copy this data and save the image. Both will be needed for decryption.</p>
+        `;
+        resultEl.style.display = 'block';
+        
+        // Visualize chaotic sequence
+        visualizeChaos('encrypt-canvas', chaosSeq);
+      } catch (err) {
+        alert('Encryption failed: ' + err.message);
+        console.error(err);
+      }
+    }
+
+    // Decrypt message handler
+    async function decryptMessage() {
+      const dataEl = document.getElementById('decrypt-data');
+      const encryptedData = dataEl.value.trim();
+      const imageEl = document.getElementById('decrypt-image');
+      const resultEl = document.getElementById('decrypt-result');
+      
+      if (!encryptedData) {
+        alert('Please enter encrypted data');
+        return;
+      }
+      
+      if (!imageEl.files[0]) {
+        alert('Please select the same image used for encryption');
+        return;
+      }
+      
+      try {
+        // Parse encrypted data
+        const { cipher, length } = JSON.parse(encryptedData);
+        
+        // Extract entropy from image
+        const { x0, r } = await extractEntropy(imageEl.files[0], 16);
+        
+        // Generate chaotic sequence and prime keys
+        const chaosSeq = generateChaos(x0, r, length);
+        const primeKeys = chaosToPrimes(chaosSeq);
+        
+        // Decrypt message
+        const decrypted = decrypt(cipher, primeKeys);
+        
+        // Display result
+        resultEl.innerHTML = `
+          <h3>Decryption Successful!</h3>
+          <p>Your decrypted message:</p>
+          <div class="code-block">${decrypted}</div>
+        `;
+        resultEl.style.display = 'block';
+        
+        // Visualize chaotic sequence
+        visualizeChaos('decrypt-canvas', chaosSeq);
+      } catch (err) {
+        alert('Decryption failed: ' + err.message);
+        console.error(err);
+      }
+    }
+
+    // Visualize chaotic sequence
+    function visualizeChaos(canvasId, sequence) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      
+      // Set canvas dimensions
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw chaotic sequence
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height - (sequence[0] * canvas.height));
+      
+      for (let i = 1; i < sequence.length; i++) {
+        const x = (i / sequence.length) * canvas.width;
+        const y = canvas.height - (sequence[i] * canvas.height);
+        ctx.lineTo(x, y);
+      }
+      
+      ctx.strokeStyle = '#4a7baf';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Add points
+      for (let i = 0; i < sequence.length; i++) {
+        const x = (i / sequence.length) * canvas.width;
+        const y = canvas.height - (sequence[i] * canvas.height);
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#1a3a5f';
+        ctx.fill();
+      }
+    }
+  </script>
+</body>
+</html>
